@@ -11,9 +11,9 @@ list_inputScale_scale = []
 # 输入层阀值
 list_inputScale_threshold = []
 # 输出层比例倒数
-list_inv_outputScale_scale = []
+list_outputScale_scale = []
 # 输入层阀值倒数
-list_inv_outputScale_threshold = []
+list_outputScale_threshold = []
 
 # 比例列表容器
 lists_weight_scale = []
@@ -42,11 +42,11 @@ def parser_xml(src_dir):
         list_inputScale_scale_and_threshold = s_inputscale.split()
         parser_input_scale_and_threshold(list_inputScale_scale_and_threshold)
 
-        # inv_output_scale标签所在位置
-        inv_output_scale = opencv_ml_ann_mlp[12]
-        s_inv_output_scale = inv_output_scale.text
-        list_inv_outputScale_scale_and_threshold = s_inv_output_scale.split()
-        parser_output_scale_and_threshold(list_inv_outputScale_scale_and_threshold)
+        # output_scale标签所在位置
+        output_scale = opencv_ml_ann_mlp[11]
+        s_output_scale = output_scale.text
+        list_outputScale_scale_and_threshold = s_output_scale.split()
+        parser_output_scale_and_threshold(list_outputScale_scale_and_threshold)
 
         # weights标签所在位置,阀值在前
         weights = opencv_ml_ann_mlp[13]
@@ -61,11 +61,11 @@ def parser_xml(src_dir):
                 s_list_scale_and_threshold = layer_weights.text
                 list_scale_and_threshold = s_list_scale_and_threshold.split()
                 # 计算阀值位置
-                offset = int(list_layerSize[list_flag + 1])
+                offset = (len(list_scale_and_threshold)-int(list_layerSize[list_flag + 1]))
                 # 存入队列
-                list_threshold = list_scale_and_threshold[0:offset]
+                list_threshold = list_scale_and_threshold[offset:]
                 lists_weight_threshold.append(list_threshold)
-                list_scale = list_scale_and_threshold[offset:]
+                list_scale = list_scale_and_threshold[:offset]
                 lists_weight_scale.append(list_scale)
                 # 进入下一次循环
                 list_flag += 1
@@ -87,103 +87,111 @@ def parser_input_scale_and_threshold(list):
 
 # output_scale标签下数据格式为比例与阀值交替存放
 def parser_output_scale_and_threshold(list):
-    global list_inv_outputScale_scale
+    global list_outputScale_scale
     # 输入层阀值倒数
-    global list_inv_outputScale_threshold
+    global list_outputScale_threshold
     flag = 0
     for child in list:
         if flag == 0:
-            list_inv_outputScale_scale.append(child)
+            list_outputScale_scale.append(child)
             flag = 1
         else:
-            list_inv_outputScale_threshold.append(child)
+            list_outputScale_threshold.append(child)
             flag = 0
 
 
 def translation_to_c(des_dir):
     with open(des_dir, 'w') as newf:
         global list_layerSize
-        global list_inv_outputScale_scale
-        global list_inv_outputScale_threshold
+        global list_outputScale_scale
+        global list_outputScale_threshold
         global lists_weight_scale
         global lists_weight_threshold
         flag = 0
         container = ""
-        print(len(lists_weight_scale))
         # list_inputScale_scale
         for num in list_inputScale_scale:
             s_num = str(float(num))
             if flag == 0:
                 tem = "float list_inputScale_scale[] = {"
-            tem = tem + s_num + ','
-            flag += 1
-            if flag == len(list_inputScale_scale):
+            if flag == len(list_inputScale_scale)-1:
                 tem = tem + s_num + '}; \n'
                 flag = 0
                 container = container + tem
+            else:
+                tem = tem + s_num + ','
+                flag += 1
 
         # list_inputScale_threshold
         for num in list_inputScale_threshold:
             s_num = str(float(num))
             if flag == 0:
                 tem = "float list_inputScale_threshold[] = {"
-
-            tem = tem + s_num + ','
-            flag += 1
-            if flag == len(list_inputScale_threshold):
+            if flag == len(list_inputScale_threshold)-1:
                 tem = tem + s_num + '}; \n'
                 flag = 0
                 container = container + tem
-        # list_inv_outputScale_scale
-        for num in list_inv_outputScale_scale:
+            else:
+                tem = tem + s_num + ','
+                flag += 1
+
+        # list_outputScale_scale
+        for num in list_outputScale_scale:
             s_num = str(float(num))
             if flag == 0:
-                tem = "float list_inv_outputScale_scale[] = {"
-            tem = tem + s_num + ','
-            flag += 1
-            if flag == len(list_inv_outputScale_scale):
+                tem = "float list_outputScale_scale[] = {"
+            if flag == len(list_outputScale_scale)-1:
                 tem = tem + s_num + '}; \n'
                 flag = 0
                 container = container + tem
+            else:
+                tem = tem + s_num + ','
+                flag += 1
 
-        # list_inv_outputScale_threshold
-        for num in list_inv_outputScale_threshold:
+
+        # list_outputScale_threshold
+        for num in list_outputScale_threshold:
             s_num = str(float(num))
             if flag == 0:
-                tem = "float list_inv_outputScale_threshold[] = {"
-            tem = tem + s_num + ','
-            flag += 1
-            if flag == len(list_inv_outputScale_threshold):
+                tem = "float list_outputScale_threshold[] = {"
+            if flag == len(list_outputScale_threshold)-1:
                 tem = tem + s_num + '}; \n'
                 flag = 0
                 container = container + tem
+            else:
+                tem = tem + s_num + ','
+                flag += 1
 
         lab = 1
-        for list in lists_weight_scale:
-            for num in list:
+        for list1 in lists_weight_scale:
+            for num in list1:
                 s_num = str(float(num))
                 if flag == 0:
                     tem = "float list_weight_scale"+str(lab)+"[] = {"
-                tem = tem + s_num + ','
-                flag += 1
-                if flag == len(list):
+                if flag == len(list1)-1:
                     tem = tem + s_num + '}; \n'
                     flag = 0
                     container = container + tem
+                else:
+                    tem = tem + s_num + ','
+                    flag += 1
             lab += 1
 
         lab2 = 1
-        for list in lists_weight_threshold:
-            for num in list:
+        for list2 in lists_weight_threshold:
+            for num in list2:
                 s_num = str(float(num))
                 if flag == 0:
                     tem = "float list_weight_threshold" + str(lab2) + "[] = {"
-                tem = tem + s_num + ','
-                flag += 1
-                if flag == len(list):
+
+                if flag == len(list2)-1:
                     tem = tem + s_num + '}; \n'
                     flag = 0
                     container = container + tem
+                else:
+                    tem = tem + s_num + ','
+                    flag += 1
+
             lab2 += 1
 
         newf.write(container)

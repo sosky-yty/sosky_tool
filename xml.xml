@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<opencv_ml_ann_mlp>
+  <format>3</format>
+  <layer_sizes>
+    1 2 2 1</layer_sizes>
+  <activation_function>SIGMOID_SYM</activation_function>
+  <f_param1>6.6666666666666663e-01</f_param1>
+  <f_param2>1.7159000000000000e+00</f_param2>
+  <min_val>-9.4999999999999996e-01</min_val>
+  <max_val>9.4999999999999996e-01</max_val>
+  <min_val1>-9.7999999999999998e-01</min_val1>
+  <max_val1>9.7999999999999998e-01</max_val1>
+  <training_params>
+    <train_method>BACKPROP</train_method>
+    <dw_scale>1.0000000000000001e-01</dw_scale>
+    <moment_scale>9.0000000000000002e-01</moment_scale>
+    <term_criteria>
+      <iterations>200</iterations></term_criteria></training_params>
+  <input_scale>
+    2. -3.</input_scale>
+  <output_scale>
+    5.2631578947368418e-01 4.9999999999999994e-01</output_scale>
+  <inv_output_scale>
+    1.8999999999999999e+00 -9.4999999999999996e-01</inv_output_scale>
+  <weights>
+    <_>
+      -1.6891713375463477e+00 -1.5502467254474805e+00
+      -1.8867398089135226e-01 3.7502865120898281e-02</_>
+    <_>
+      -1.5159792476475544e+00 -5.6166412829006174e-01
+      -1.3180641250795662e+00 -6.3955380345874280e-01
+      -7.0620978841732504e-02 -1.4829267046506078e-01</_>
+    <_>
+      1.2116843427400952e+00 8.8027791437053760e-01
+      4.0122104390167265e-02</_></weights></opencv_ml_ann_mlp>
+</opencv_storage>
