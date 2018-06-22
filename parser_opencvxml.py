@@ -63,12 +63,14 @@ def parser_xml(src_dir):
                 s_list_scale_and_threshold = layer_weights.text
                 list_scale_and_threshold = s_list_scale_and_threshold.split()
                 # 计算阀值位置
-                offset = (len(list_scale_and_threshold)-int(list_layerSize[list_flag + 1]))
+                offset = (len(list_scale_and_threshold) - int(list_layerSize[list_flag + 1]))
                 # 存入队列
                 list_threshold = list_scale_and_threshold[offset:]
                 lists_weight_threshold.append(list_threshold)
                 list_scale = list_scale_and_threshold[:offset]
-                lists_weight_scale.append(list_scale)
+                r_list_scale = parser_weights_scale(list=list_scale, flag=list_flag)
+                lists_weight_scale.append(r_list_scale)
+
                 # 进入下一次循环
                 list_flag += 1
 
@@ -102,6 +104,29 @@ def parser_output_scale_and_threshold(list):
             flag = 0
 
 
+# 对scale重排列,便于并行计算
+def parser_weights_scale(list, flag):
+    num_Neuron = 0
+    next_flag = 0
+    r_list = []
+    for it in list:
+        print(it)
+    # 比例在源数组中的偏移
+    offset = int(list_layerSize[flag+1])
+    # 按照下一层神经元个数排列,遍历下一层神经元
+    while int(list_layerSize[flag + 1]) > num_Neuron:
+        if 1:
+            # 遍历这一层神神经元与下一层神经元的链接比例
+            while int(list_layerSize[flag]) > next_flag:
+                r_offset = offset * next_flag + num_Neuron
+                if r_offset < len(list):
+                    r_list.append(list[r_offset])
+                next_flag += 1
+            next_flag = 0
+        num_Neuron += 1
+    return r_list
+
+
 def translation_to_c(des_dir):
     with open(des_dir, 'w') as newf:
         global list_layerSize
@@ -116,7 +141,7 @@ def translation_to_c(des_dir):
             s_num = str(float(num))
             if flag == 0:
                 tem = "float list_inputScale_scale[] = {"
-            if flag == len(list_inputScale_scale)-1:
+            if flag == len(list_inputScale_scale) - 1:
                 tem = tem + s_num + '}; \n'
                 flag = 0
                 container = container + tem
@@ -129,7 +154,7 @@ def translation_to_c(des_dir):
             s_num = str(float(num))
             if flag == 0:
                 tem = "float list_inputScale_threshold[] = {"
-            if flag == len(list_inputScale_threshold)-1:
+            if flag == len(list_inputScale_threshold) - 1:
                 tem = tem + s_num + '}; \n'
                 flag = 0
                 container = container + tem
@@ -142,7 +167,7 @@ def translation_to_c(des_dir):
             s_num = str(float(num))
             if flag == 0:
                 tem = "float list_outputScale_scale[] = {"
-            if flag == len(list_outputScale_scale)-1:
+            if flag == len(list_outputScale_scale) - 1:
                 tem = tem + s_num + '}; \n'
                 flag = 0
                 container = container + tem
@@ -150,13 +175,12 @@ def translation_to_c(des_dir):
                 tem = tem + s_num + ','
                 flag += 1
 
-
         # list_outputScale_threshold
         for num in list_outputScale_threshold:
             s_num = str(float(num))
             if flag == 0:
                 tem = "float list_outputScale_threshold[] = {"
-            if flag == len(list_outputScale_threshold)-1:
+            if flag == len(list_outputScale_threshold) - 1:
                 tem = tem + s_num + '}; \n'
                 flag = 0
                 container = container + tem
@@ -169,8 +193,8 @@ def translation_to_c(des_dir):
             for num in list1:
                 s_num = str(float(num))
                 if flag == 0:
-                    tem = "float list_weight_scale"+str(lab)+"[] = {"
-                if flag == len(list1)-1:
+                    tem = "float list_weight_scale" + str(lab) + "[] = {"
+                if flag == len(list1) - 1:
                     tem = tem + s_num + '}; \n'
                     flag = 0
                     container = container + tem
@@ -186,7 +210,7 @@ def translation_to_c(des_dir):
                 if flag == 0:
                     tem = "float list_weight_threshold" + str(lab2) + "[] = {"
 
-                if flag == len(list2)-1:
+                if flag == len(list2) - 1:
                     tem = tem + s_num + '}; \n'
                     flag = 0
                     container = container + tem

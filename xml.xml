@@ -18,7 +18,7 @@
     <term_criteria>
       <iterations>200</iterations></term_criteria></training_params>
   <input_scale>
-    2. -3.</input_scale>
+    2.0 -3.0</input_scale>
   <output_scale>
     5.2631578947368418e-01 4.9999999999999994e-01</output_scale>
   <inv_output_scale>
